@@ -12,6 +12,8 @@ class Application < Sinatra::Base
   include ERB::Util
   register Sinatra::ActiveRecordExtension
 
+  protocol_pattern = Regexp.new(%r{^\w+:|^//}).freeze
+
   configure :development do
     register Sinatra::Reloader
 
@@ -41,7 +43,7 @@ class Application < Sinatra::Base
       target = Shorturls.find_by(url:)&.target
       redis.set("shorturl:#{url}", target) if target
     end
-    if params[:json]
+    if params[:json] == 'true'
       # If JSON is requested, return JSON instead of redirecting
       if target
         json exists: true, target:
@@ -50,7 +52,7 @@ class Application < Sinatra::Base
         json exists: false
       end
     elsif target
-      # Redirect if it is a shortened URL
+      # Redirect if it is a short-URL
       status 302
       response['Location'] = target
       halt
@@ -63,15 +65,33 @@ class Application < Sinatra::Base
     retries = 0
     begin
       # https://zelark.github.io/nano-id-cc/
-      url = Nanoid.generate(size: ENV['NANOID_SIZE']&.to_i || 11)
-      Shorturls.create(url:, target: params[:target])
-      if params[:response_html]
+      size = ENV['NANOID_SIZE'].to_i
+      size = 11 if size.zero?
+
+      url = Nanoid.generate(size:)
+      response_html = params[:response_html] == 'true'
+
+      target = params[:target].to_s.strip
+      if target.empty?
+        # Invalid request
+        if response_html
+          redirect to('/'), 302
+        else
+          error 400
+        end
+      end
+
+      # Add // prefix if no protocol is specified (i.e. http://), for absolute redirect in browsers
+      target = "//#{target}" unless protocol_pattern.match?(target)
+
+      Shorturls.create(url:, target:)
+      if response_html
         erb :result, locals: {
           url:
         }
       else
         json url:, url_full: "#{request.base_url}/#{url}", base_url: request.base_url,
-             target: params[:target]
+             target:
       end
     rescue ActiveRecord::RecordNotUnique
       # If a collision occurs (extremely rare), generate a new URL.
@@ -84,6 +104,12 @@ class Application < Sinatra::Base
     @title = '404 - Not Found'
 
     erb :not_found
+  end
+
+  error 400 do
+    @title = 'Invalid request'
+
+    erb :error
   end
 
   error 500 do

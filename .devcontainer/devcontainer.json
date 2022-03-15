@@ -11,7 +11,8 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"rebornix.Ruby",
-		"castwide.solargraph"
+		"castwide.solargraph",
+		"aliariff.vscode-erb-beautify"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or the host.
@@ -21,7 +22,7 @@
 		6379
 	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bundle install && rake db:setup",
+	"postCreateCommand": "bundle install && rake db:setup; exit 0",
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
 }

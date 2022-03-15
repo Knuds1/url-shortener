@@ -7,17 +7,18 @@ services:
       dockerfile: Dockerfile
     volumes:
       - postgres-socket:/var/run/postgresql
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     ports:
       - "8080:80"
-    command:
-      - /bin/bash
-      - -c
-      - |
-        bundle exec rails db:reset
-        bundle exec rails db:migrate
     restart: unless-stopped
     environment:
-      NANOID_SIZE: '11'
+      APP_ENV: production
+      NANOID_SIZE: 11
+      REDIS_URL: redis://redis:6379
       DATABASE_HOST:
       DATABASE_NAME: postgres
       DATABASE_USER: postgres
@@ -29,7 +30,6 @@ services:
       - redis-data:/data
     restart: unless-stopped
     command: redis-server --appendonly yes
-    network_mode: service:app
 
   db:
     image: postgres:14.2
@@ -37,11 +37,15 @@ services:
       - postgres-socket:/var/run/postgresql
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: postgres
-    network_mode: service:app
 
 volumes:
   redis-data: null

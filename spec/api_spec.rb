@@ -64,4 +64,18 @@ describe 'API' do
       expect(parsed['target']).to eq(target)
     end
   end
+
+  it 'appends // to URLs without protocol' do
+    DatabaseCleaner.cleaning do
+      post '/', { target: 'http://example.com'}
+      parsed = JSON.parse(last_response.body)
+      expect(parsed['target']).to eq('http://example.com')
+      post '/', { target: '//example.com'}
+      parsed = JSON.parse(last_response.body)
+      expect(parsed['target']).to eq('//example.com')
+      post '/', { target: 'example.com'}
+      parsed = JSON.parse(last_response.body)
+      expect(parsed['target']).to eq('//example.com')
+    end
+  end
 end
