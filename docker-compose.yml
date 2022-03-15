@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - postgres-socket:/var/run/postgresql
+    ports:
+      - "8080:80"
+    command:
+      - /bin/bash
+      - -c
+      - |
+        bundle exec rails db:reset
+        bundle exec rails db:migrate
+    restart: unless-stopped
+    environment:
+      NANOID_SIZE: '11'
+      DATABASE_HOST:
+      DATABASE_NAME: postgres
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+
+  redis:
+    image: redis:6.2.6
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    network_mode: service:app
+
+  db:
+    image: postgres:14.2
+    volumes:
+      - postgres-socket:/var/run/postgresql
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    network_mode: service:app
+
+volumes:
+  redis-data: null
+  postgres-socket: null
+  postgres-data: null
