@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - postgres-socket:/var/run/postgresql
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      NANOID_SIZE: 11
+      REDIS_URL: redis://redis:6379
+      DATABASE_HOST:
+      DATABASE_NAME: postgres
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+
+  redis:
+    image: redis:6.2.6
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  db:
+    image: postgres:14.2
+    volumes:
+      - postgres-socket:/var/run/postgresql
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+
+volumes:
+  redis-data: null
+  postgres-socket: null
+  postgres-data: null

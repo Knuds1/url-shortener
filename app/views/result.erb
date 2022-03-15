@@ -1,0 +1,15 @@
+<h1 class="hide"><%= h @title %></h1>
+<div class="app-wrapper">
+  <div class="app">
+    <div class="content result">
+      <div class="form-main">
+        <p>🎉 Congrats! Your URL has been shortened to</p>
+        <input type="text" id="url" value="<%= "#{request.base_url}/#{h url}" %>">
+      </div>
+      <input id="copy-url" class="cta" type="button" value="📋">
+    </div>
+    <div class="links">
+      <a href="/">&lsaquo; Shorten another URL</a> | <a href="<%= "#{request.base_url}/#{h url}" %>" target="_blank" rel="noreferrer noopener">Open</a>
+    </div>
+  </div>
+</div>

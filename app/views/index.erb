@@ -1,0 +1,16 @@
+<h1 class="hide"><%= h @title %></h1>
+<div class="app-wrapper">
+  <div class="app">
+    <form class="content" action="/" method="post">
+      <div class="form-main">
+        <label for="target">
+          <p>Shorten a URL</p>
+          <%# HTML template response instead of JSON %>
+          <input type="hidden" name="response_html" value="true">
+          <input id="target" name="target" type="text" placeholder="https://..." required>
+        </label>
+      </div>
+      <input class="cta" type="submit" value="✂️">
+    </form>
+  </div>
+</div>

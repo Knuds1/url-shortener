@@ -1,0 +1,10 @@
+AllCops:
+  Exclude:
+  - spec/**/*
+  - db/**/*
+
+Metrics/ClassLength:
+  Enabled: false
+  
+Metrics/BlockLength:
+  Enabled: false

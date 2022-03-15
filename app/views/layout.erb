@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= h @title %></title>
+    <% if status == 200 %>
+      <meta name="description" content="<%= h @description %>">
+      <meta name="author" content="<%= h @author %>">
+      <meta property="og:title" content="<%= h @title %>">
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="<%= h request.url %>">
+      <meta property="og:description" content="<%= h @description %>">
+    <% end %>
+    <link rel="stylesheet" href="css/styles.css?v=1.0">
+  </head>
+  <body>
+    <%= yield %>
+    <script src="js/javascript.js?v=1.0"></script>
+  </body>
+</html>
