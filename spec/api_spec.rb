@@ -65,7 +65,7 @@ describe 'API' do
     end
   end
 
-  it 'appends // to URLs without protocol' do
+  it 'prefixes URLs without protocol with //' do
     DatabaseCleaner.cleaning do
       post '/', { target: 'http://example.com'}
       parsed = JSON.parse(last_response.body)
